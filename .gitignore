@@ -1,0 +1,57 @@
+# ----------------
+# DOCS (Docusaurus)
+# ----------------
+
+docs/node_modules
+docs/build
+docs/.docusaurus
+docs/.cache-loader
+
+docs/.env.local
+docs/.env.development.local
+docs/.env.test.local
+docs/.env.production.local
+
+# ----------------
+# Node (global)
+# ----------------
+
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ----------------
+# .NET
+# ----------------
+
+bin/
+obj/
+
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# NuGet
+*.nupkg
+*.snupkg
+
+# IDE
+.vs/
+.idea/
+
+# OTHER
+overview.txt
+
+# Optional: keep shared VSCode config
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+
+# ----------------
+# OS / Misc
+# ----------------
+
+.DS_Store
+.cache/
