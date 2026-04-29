@@ -10,6 +10,7 @@ public class PresetBuilder {
     private string? _id;
     private Uri? _modelUri;
     private string? _checksum;
+    private bool _lowercase = false;
     private List<Uri> _tokenizerFiles = [];
     private PoolingStrategy _pooling = PoolingStrategy.Mean;
     private TokenizationType _tokenization = TokenizationType.WordPiece;
@@ -29,6 +30,7 @@ public class PresetBuilder {
 
         return new VectanticPreset(
             _id!, _modelUri, _checksum!, 
+            _lowercase,
             _tokenizerFiles.AsReadOnly(), 
             _pooling, _tokenization,
             _maxTokens
@@ -61,6 +63,11 @@ public class PresetBuilder {
         StringGuard.RequireOrException(checksum, "Preset's Checksum");
         
         _checksum = checksum;
+        return this;
+    }
+    
+    public PresetBuilder ApplyLowerCase(bool lowercase) {
+        _lowercase = lowercase;
         return this;
     }
     
