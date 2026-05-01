@@ -22,7 +22,7 @@ public sealed class VectanticPreset : VectanticModelInfo {
         PoolingStrategy pooling,
         TokenizationType tokenization,
         int? maxTokens) 
-        : base(id, modelUrl, checksum)
+        : base(id, modelUrl, checksum, TokenizerFiles2Dict(tokenizerFiles))
     {
         LowerCase = lowercase;
         OutputTensorName = outputTensorName;
@@ -31,6 +31,9 @@ public sealed class VectanticPreset : VectanticModelInfo {
         Tokenization = tokenization;
         MaxTokens = maxTokens;
     }
+
+    private static IReadOnlyDictionary<string, Uri> TokenizerFiles2Dict(IReadOnlyList<Uri> tokFiles)
+        => tokFiles.ToDictionary(uri => Path.GetFileName(uri.AbsolutePath), uri => uri);
 
     // -------------------- DEFAULT MODELS --------------------
     public static VectanticPreset MiniLML6V2 { get; } = new PresetBuilder()
