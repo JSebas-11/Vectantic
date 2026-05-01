@@ -6,6 +6,7 @@ namespace Vectantic.Semantic.Configuration;
 
 public sealed class VectanticPreset : VectanticModelInfo {
     public bool LowerCase { get; }
+    public string OutputTensorName { get; }
     public IReadOnlyList<Uri> TokenizerFiles { get; }
     public PoolingStrategy Pooling { get; }
     public TokenizationType Tokenization { get; }
@@ -16,6 +17,7 @@ public sealed class VectanticPreset : VectanticModelInfo {
         Uri modelUrl,
         string checksum,
         bool lowercase,
+        string outputTensorName,
         IReadOnlyList<Uri> tokenizerFiles,
         PoolingStrategy pooling,
         TokenizationType tokenization,
@@ -23,6 +25,7 @@ public sealed class VectanticPreset : VectanticModelInfo {
         : base(id, modelUrl, checksum)
     {
         LowerCase = lowercase;
+        OutputTensorName = outputTensorName;
         TokenizerFiles = tokenizerFiles;
         Pooling = pooling;
         Tokenization = tokenization;
@@ -34,7 +37,8 @@ public sealed class VectanticPreset : VectanticModelInfo {
         .WithId("all-MiniLM-L6-v2")
         .WithModelUrl("https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/main/onnx/model.onnx")
         .WithChecksum("6fd5d72fe4589f189f8ebc006442dbb529bb7ce38f8082112682524616046452")
-        .ApplyLowerCase(false)
+        .ApplyLowerCase(true)
+        .WithOutputTensorName("last_hidden_state")
         .WithTokenizerFiles([
             "https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/main/tokenizer.json",
             "https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/main/tokenizer_config.json",
@@ -50,7 +54,8 @@ public sealed class VectanticPreset : VectanticModelInfo {
         .WithId("bge-small-en-v1.5")
         .WithModelUrl("https://huggingface.co/BAAI/bge-small-en-v1.5/resolve/main/onnx/model.onnx")
         .WithChecksum("828e1496d7fabb79cfa4dcd84fa38625c0d3d21da474a00f08db0f559940cf35")
-        .ApplyLowerCase(false)
+        .ApplyLowerCase(true)
+        .WithOutputTensorName("last_hidden_state")
         .WithTokenizerFiles([
             "https://huggingface.co/BAAI/bge-small-en-v1.5/resolve/main/tokenizer.json",
             "https://huggingface.co/BAAI/bge-small-en-v1.5/resolve/main/tokenizer_config.json",
