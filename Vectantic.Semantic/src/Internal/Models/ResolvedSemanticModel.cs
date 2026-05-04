@@ -9,6 +9,7 @@ internal sealed class ResolvedSemanticModel : ResolvedModel {
     public string TokenizerPath { get; }
     public PoolingStrategy Pooling { get; }
     public TokenizationType Tokenization { get; }
+    public bool RequiresTokenTypeIds { get; }
 
     internal ResolvedSemanticModel(
         string modelPath,
@@ -17,7 +18,8 @@ internal sealed class ResolvedSemanticModel : ResolvedModel {
         string outputTensorName,
         string tokenizerPath,
         PoolingStrategy pooling,
-        TokenizationType tokenization)
+        TokenizationType tokenization,
+        bool requiresTokenTypeIds)
         : base(modelPath, maxTokens)
     {
         LowerCase = lowercase;
@@ -25,5 +27,6 @@ internal sealed class ResolvedSemanticModel : ResolvedModel {
         TokenizerPath = tokenizerPath;
         Pooling = pooling;
         Tokenization = tokenization;
+        RequiresTokenTypeIds = requiresTokenTypeIds;
     }
 }

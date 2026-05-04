@@ -10,6 +10,7 @@ public sealed class VectanticPreset : VectanticModelInfo {
     public IReadOnlyList<Uri> TokenizerFiles { get; }
     public PoolingStrategy Pooling { get; }
     public TokenizationType Tokenization { get; }
+    public bool RequiresTokenTypeIds { get; }
     public int? MaxTokens { get; }
 
     internal VectanticPreset(
@@ -21,7 +22,8 @@ public sealed class VectanticPreset : VectanticModelInfo {
         IReadOnlyList<Uri> tokenizerFiles,
         PoolingStrategy pooling,
         TokenizationType tokenization,
-        int? maxTokens) 
+        int? maxTokens,
+        bool requiresTokenTypeIds) 
         : base(id, modelUrl, checksum, TokenizerFiles2Dict(tokenizerFiles))
     {
         LowerCase = lowercase;
@@ -29,6 +31,7 @@ public sealed class VectanticPreset : VectanticModelInfo {
         TokenizerFiles = tokenizerFiles;
         Pooling = pooling;
         Tokenization = tokenization;
+        RequiresTokenTypeIds = requiresTokenTypeIds;
         MaxTokens = maxTokens;
     }
 
@@ -41,6 +44,7 @@ public sealed class VectanticPreset : VectanticModelInfo {
         .WithModelUrl("https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/main/onnx/model.onnx")
         .WithChecksum("6fd5d72fe4589f189f8ebc006442dbb529bb7ce38f8082112682524616046452")
         .ApplyLowerCase(true)
+        .WithTokenTypeIds(true)
         .WithOutputTensorName("last_hidden_state")
         .WithTokenizerFiles([
             "https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/main/tokenizer.json",
@@ -58,6 +62,7 @@ public sealed class VectanticPreset : VectanticModelInfo {
         .WithModelUrl("https://huggingface.co/BAAI/bge-small-en-v1.5/resolve/main/onnx/model.onnx")
         .WithChecksum("828e1496d7fabb79cfa4dcd84fa38625c0d3d21da474a00f08db0f559940cf35")
         .ApplyLowerCase(true)
+        .WithTokenTypeIds(true)
         .WithOutputTensorName("last_hidden_state")
         .WithTokenizerFiles([
             "https://huggingface.co/BAAI/bge-small-en-v1.5/resolve/main/tokenizer.json",
