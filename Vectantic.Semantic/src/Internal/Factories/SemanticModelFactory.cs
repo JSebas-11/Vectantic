@@ -20,7 +20,8 @@ internal static class SemanticModelFactory {
             preset.OutputTensorName,
             tokenizerPath,
             preset.Pooling,
-            preset.Tokenization
+            preset.Tokenization,
+            preset.RequiresTokenTypeIds
         );
     }
 }
