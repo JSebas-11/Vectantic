@@ -2,7 +2,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Vectantic.Core.Configuration;
 using Vectantic.Core.Exceptions;
 using Vectantic.Core.Interfaces;
-using Vectantic.Core.Internal.Extensions;
 using Vectantic.Core.Internal.Onnx;
 using Vectantic.Core.Models;
 
@@ -14,30 +13,26 @@ public sealed class VectanticBuilder {
     private readonly IModelDownloader _modelDownloader;
     private readonly VectanticModelInfo _modelInfo;
     private readonly VectanticOptions _opts;
+    private readonly Action<DownloadResult> _onComplete;
 
     internal VectanticBuilder(
         IServiceCollection services, IModelDownloader modelDownloader,
-        VectanticModelInfo modelInfo, VectanticOptions opts) 
+        VectanticModelInfo modelInfo, VectanticOptions opts,
+        Action<DownloadResult> onComplete) 
     {
         _services = services;    
         _modelDownloader = modelDownloader;    
         _modelInfo = modelInfo;    
         _opts = opts;    
+        _onComplete = onComplete;
     }
 
     // -------------------- METHS --------------------
     public async Task EnsureModelsAsync(IProgress<float>? progress = null, CancellationToken ct = default) {
-        // VALIDATION
-        if (_opts.UseGpu)
-            throw new VectanticException("GPU acceleration is not supported in V1. Set UseGpu = false");
-
-        // CORE DI
-        _services.AddVectanticCore(_opts);
-
         // DOWNLOAD
         var downloadResult = await DownloadWithRetries(progress, ct);
 
-        _services.AddSingleton(downloadResult);
+        _onComplete(downloadResult);
         _services.AddSingleton<IOnnxSession>(_ => new OnnxSession(downloadResult.ModelPath));
     }
 
