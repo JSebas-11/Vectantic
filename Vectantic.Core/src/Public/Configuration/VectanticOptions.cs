@@ -1,6 +1,6 @@
 namespace Vectantic.Core.Configuration;
 
-public class VectanticOptions {
+public sealed class VectanticOptions {
     private static readonly string DefaultCacheDirectory = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
         "Vectantic", "models"
