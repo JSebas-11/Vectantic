@@ -1,4 +1,3 @@
-
 using System.Security.Cryptography;
 using Vectantic.Core.Exceptions;
 
