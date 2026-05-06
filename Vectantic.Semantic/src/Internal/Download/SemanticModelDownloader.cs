@@ -35,10 +35,10 @@ internal sealed class SemanticModelDownloader : IModelDownloader {
                 var filePath = Path.Combine(tokenizerDir, extraFile.Key);
                 downloads.Add(DownloadIfNotCached(extraFile.Value, filePath, null, ct));
             }
-            await Task.WhenAll(downloads);
+            await Task.WhenAll(downloads).ConfigureAwait(false);
 
             // CHECKSUM
-            if (!await _fileDownloader.VerifyChecksumAsync(modelPath, info.Checksum))
+            if (!await _fileDownloader.VerifyChecksumAsync(modelPath, info.Checksum).ConfigureAwait(false))
                 throw new VectanticModelException("Model was downloaded, however its checksum verification failed.");
 
             return new DownloadResult(
@@ -55,6 +55,6 @@ internal sealed class SemanticModelDownloader : IModelDownloader {
     private async Task DownloadIfNotCached(Uri src, string path, IProgress<float>? progress, CancellationToken ct) {
         if (_fileDownloader.IsCached(path)) return;
 
-        await _fileDownloader.DownloadFileAsync(src, path, progress, ct);
+        await _fileDownloader.DownloadFileAsync(src, path, progress, ct).ConfigureAwait(false);
     }
 }

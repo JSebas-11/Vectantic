@@ -40,7 +40,7 @@ internal sealed class EmbeddingService : IEmbeddingService {
 
         var tokResult = _tokenizer.Tokenize(text);
         var inputs = PackTokensToOnnxInputs(tokResult, _resolvedModel.RequiresTokenTypeIds);
-        using var onnxResult = await _onnxSession.RunAsync(inputs, ct);
+        using var onnxResult = await _onnxSession.RunAsync(inputs, ct).ConfigureAwait(false);
         var outputs = OnnxOutputsToDenseTensor(onnxResult, _resolvedModel.OutputTensorName);
         var result = _pooling.Pool(outputs, tokResult.AttentionMask);
         
@@ -60,7 +60,7 @@ internal sealed class EmbeddingService : IEmbeddingService {
 
         var tokOutput = _tokenizer.TokenizeBatch(txts);
         var inputs = PackTokensToOnnxInputs(tokOutput, _resolvedModel.RequiresTokenTypeIds);
-        using var onnxResult = await _onnxSession.RunAsync(inputs, ct);
+        using var onnxResult = await _onnxSession.RunAsync(inputs, ct).ConfigureAwait(false);
         var outputs = OnnxOutputsToDenseTensor(onnxResult, _resolvedModel.OutputTensorName);
         var poolResult = _pooling.PoolBatch(outputs, tokOutput.AttentionMask);
 

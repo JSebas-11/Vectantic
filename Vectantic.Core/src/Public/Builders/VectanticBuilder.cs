@@ -30,7 +30,7 @@ public sealed class VectanticBuilder {
     // -------------------- METHS --------------------
     public async Task EnsureModelsAsync(IProgress<float>? progress = null, CancellationToken ct = default) {
         // DOWNLOAD
-        var downloadResult = await DownloadWithRetries(progress, ct);
+        var downloadResult = await DownloadWithRetries(progress, ct).ConfigureAwait(false);
 
         _onComplete(downloadResult);
         _services.AddSingleton<IOnnxSession>(_ => new OnnxSession(downloadResult.ModelPath));
@@ -41,14 +41,15 @@ public sealed class VectanticBuilder {
         int attempts = 0;
         while (true) {
             try {
-                return await _modelDownloader.DownloadModelAsync(_modelInfo, _opts, progress, ct);
+                return await _modelDownloader.DownloadModelAsync(_modelInfo, _opts, progress, ct)
+                    .ConfigureAwait(false);
             }
             catch (VectanticDownloadException ex) {
                 attempts++;
                 if (attempts >= _opts.MaxRetries)
                     throw new VectanticDownloadException($"Model download failed after {attempts} attempts. {ex.Message}", ex);
 
-                await Task.Delay(TimeSpan.FromSeconds(attempts * 2), ct);
+                await Task.Delay(TimeSpan.FromSeconds(attempts * 2), ct).ConfigureAwait(false);
             }
         }
     }
