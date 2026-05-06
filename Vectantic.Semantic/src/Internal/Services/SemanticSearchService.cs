@@ -9,7 +9,7 @@ internal sealed class SemanticSearchService : ISemanticSearchService {
     // -------------------- INIT --------------------
     private readonly IEmbeddingService _embeddingService;
 
-    internal SemanticSearchService(IEmbeddingService embeddingService) {
+    public SemanticSearchService(IEmbeddingService embeddingService) {
         _embeddingService = embeddingService;
     }
 
@@ -17,7 +17,7 @@ internal sealed class SemanticSearchService : ISemanticSearchService {
     public async Task<SemanticSearchResults> SearchAsync(string query, IReadOnlyList<string> docs, int topK) {
         var queryTask = _embeddingService.EmbedAsync(query);
         var docsTask = _embeddingService.EmbedBatchAsync(docs);
-        await Task.WhenAll(queryTask, docsTask);
+        await Task.WhenAll(queryTask, docsTask).ConfigureAwait(false);
 
         var topKList = TryTopK(queryTask.Result.Vector, [.. docsTask.Result.Select(e => e.Vector)], topK);
 
@@ -50,10 +50,10 @@ internal sealed class SemanticSearchService : ISemanticSearchService {
             return EmbeddingMath.TopK(query.AsSpan(), docs, topK);
         }
         catch (ArgumentOutOfRangeException ex) {
-            throw new VectanticMathException($"There has been an math error during semantic seaching: {ex.Message}", ex);
+            throw new VectanticMathException($"A math error occurred during semantic searching: {ex.Message}", ex);
         }
         catch (ArgumentException ex) {
-            throw new VectanticMathException($"There has been an math error during semantic seaching: {ex.Message}", ex);
+            throw new VectanticMathException($"A math error occurred during semantic searching: {ex.Message}", ex);
         }
     }
 }

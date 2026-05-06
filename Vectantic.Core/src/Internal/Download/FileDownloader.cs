@@ -19,20 +19,21 @@ internal sealed class FileDownloader : IFileDownloader {
         var success = false;
         var tempPath = destinationPath + ".tmp";
         try {
-            using var response = await _httpClient.GetAsync(source, HttpCompletionOption.ResponseHeadersRead, ct);
+            using var response = await _httpClient.GetAsync(source, HttpCompletionOption.ResponseHeadersRead, ct)
+                .ConfigureAwait(false);
 
             if (!response.IsSuccessStatusCode)
                 throw new VectanticDownloadException($"Failed to download {source}. Status: {response.StatusCode}");
             
             var totalBytes = response.Content.Headers.ContentLength ?? -1L;
 
-            using var contentStream = await response.Content.ReadAsStreamAsync(ct);
+            using var contentStream = await response.Content.ReadAsStreamAsync(ct).ConfigureAwait(false);
             using var fileStream = new FileStream(
                 tempPath, FileMode.Create, FileAccess.Write,
                 FileShare.None, BufferSize, FileOptions.Asynchronous
             );
 
-            await FillAndFlushFileAsync(contentStream, fileStream, totalBytes, progress, ct);
+            await FillAndFlushFileAsync(contentStream, fileStream, totalBytes, progress, ct).ConfigureAwait(false);
             success = true;
         }
         catch (VectanticDownloadException) { throw; }
@@ -49,8 +50,8 @@ internal sealed class FileDownloader : IFileDownloader {
     public bool IsCached(string filePath) => File.Exists(filePath);
     public async Task<bool> VerifyChecksumAsync(string filePath, string expectedChecksum) {
         using var sha256 = SHA256.Create();
-        await using var stream = File.OpenRead(filePath);
-        var hash = await sha256.ComputeHashAsync(stream);
+        using var stream = File.OpenRead(filePath);
+        var hash = await sha256.ComputeHashAsync(stream).ConfigureAwait(false);
 
         return string.Equals(BitConverter.ToString(hash).Replace("-", ""), expectedChecksum, StringComparison.OrdinalIgnoreCase);
     }
@@ -63,8 +64,9 @@ internal sealed class FileDownloader : IFileDownloader {
         var bytesDownloaded = 0L;
         int bytesRead;
         
-        while ((bytesRead = await stream.ReadAsync(buffer.AsMemory(), ct)) > 0) {
-            await fileStream.WriteAsync(buffer.AsMemory(0, bytesRead), ct);
+        while ((bytesRead = await stream.ReadAsync(buffer.AsMemory(), ct).ConfigureAwait(false)) > 0) {
+            await fileStream.WriteAsync(buffer.AsMemory(0, bytesRead), ct)
+                .ConfigureAwait(false);
 
             bytesDownloaded += bytesRead;
 
@@ -72,6 +74,6 @@ internal sealed class FileDownloader : IFileDownloader {
                 progress?.Report(bytesDownloaded / (float)totalBytes);
         }
 
-        await fileStream.FlushAsync(ct);
+        await fileStream.FlushAsync(ct).ConfigureAwait(false);
     }
 }
