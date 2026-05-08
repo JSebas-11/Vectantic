@@ -1,6 +1,6 @@
-namespace Vectantic.Core.Models;
+namespace Vectantic.Core.Internal.Models;
 
-public class ResolvedModel {
+internal class ResolvedModel {
     public string ModelPath { get; }
     public int? MaxTokens { get; }
 

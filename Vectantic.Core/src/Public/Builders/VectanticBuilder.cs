@@ -7,6 +7,24 @@ using Vectantic.Core.Models;
 
 namespace Vectantic.Core.Builders;
 
+/// <summary>
+/// Coordinates model downloading, validation, and runtime registration for Vectantic services.
+/// </summary>
+/// <remarks>
+/// This builder finalizes the initialization pipeline after dependency injection registration.
+/// It downloads the configured model resources, validates model integrity,
+/// and registers the ONNX inference session into the service container.
+/// </remarks>
+/// <example>
+/// <code>
+/// await services
+///     .AddVectanticSemantic(
+///         vecOpts => {},
+///         semOpts => {},
+///         VectanticPreset.MiniLML6V2)
+///     .EnsureModelAsync();
+/// </code>
+/// </example>
 public sealed class VectanticBuilder {
     // -------------------- INIT --------------------
     private readonly IServiceCollection _services;
@@ -28,7 +46,31 @@ public sealed class VectanticBuilder {
     }
 
     // -------------------- METHS --------------------
-    public async Task EnsureModelsAsync(IProgress<float>? progress = null, CancellationToken ct = default) {
+
+    /// <summary>
+    /// Downloads the configured model resources and registers the ONNX inference session.
+    /// </summary>
+    /// <param name="progress">
+    /// An optional progress reporter that receives download progress values between 0 and 1.
+    /// </param>
+    /// <param name="ct">
+    /// A cancellation token used to cancel the download operation.
+    /// </param>
+    /// <returns>
+    /// A task representing the asynchronous initialization operation.
+    /// </returns>
+    /// <exception cref="VectanticDownloadException">
+    /// Thrown when the model download fails after all configured retry attempts are exhausted.
+    /// </exception>
+    /// <exception cref="OperationCanceledException">
+    /// Thrown when the operation is canceled through the provided cancellation token.
+    /// </exception>
+    /// <remarks>
+    /// This method performs model downloading with retry semantics using the configured
+    /// <see cref="VectanticOptions.MaxRetries"/> value. After a successful download,
+    /// the ONNX runtime session is registered as a singleton service.
+    /// </remarks>
+    public async Task EnsureModelAsync(IProgress<float>? progress = null, CancellationToken ct = default) {
         // DOWNLOAD
         var downloadResult = await DownloadWithRetries(progress, ct).ConfigureAwait(false);
 

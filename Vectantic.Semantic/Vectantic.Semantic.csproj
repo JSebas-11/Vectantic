@@ -1,18 +1,40 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <ItemGroup>
-    <ProjectReference Include="..\Vectantic.Core\Vectantic.Core.csproj" />
-    <ProjectReference Include="..\Vectantic.Math\Vectantic.Math.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.ML.Tokenizers" Version="2.0.0" />
-  </ItemGroup>
-
   <PropertyGroup>
     <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+
+    <PackageId>Vectantic.Semantic</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>Sebastian Delgado (JSebas-11)</Authors>
+    <Company>None</Company>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+
+    <Description>Semantic embedding and search module for the Vectantic SDK. Provides local text embeddings via ONNX, semantic search, BERT tokenization, mean and CLS pooling strategies, and built-in support for MiniLM-L6-v2 and BGE-Small-EN-v1.5 models.</Description>
+    <PackageTags>vectantic;semantic-search;embeddings;onnx;bert;tokenizer;pooling;local-ai;nlp;machine-learning;dotnet;minilm;bge;sentence-transformers</PackageTags>
+
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/JSebas-11/Vectantic</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/JSebas-11/Vectantic</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+
   </PropertyGroup>
+
+
+  <ItemGroup>
+    <None Include="..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\Vectantic.Core\Vectantic.Core.csproj" />
+    <ProjectReference Include="..\Vectantic.Math\Vectantic.Math.csproj" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="Microsoft.ML.Tokenizers" Version="2.0.0" />
+  </ItemGroup>
 
 </Project>
