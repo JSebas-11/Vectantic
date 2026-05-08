@@ -1,4 +1,4 @@
-using Vectantic.Core.Models;
+using Vectantic.Core.Internal.Models;
 using Vectantic.Semantic.Enums;
 
 namespace Vectantic.Semantic.Internal.Models;
