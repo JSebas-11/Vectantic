@@ -4,7 +4,28 @@
     <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+
+    <PackageId>Vectantic.Math</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>Sebastian Delgado (JSebas-11)</Authors>
+    <Company>None</Company>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+
+    <Description>High-performance vector math utilities for the Vectantic SDK (it also works standalone). Provides Span-based dot product, cosine similarity, normalization, magnitude, and TopK operations with SIMD acceleration via TensorPrimitives.</Description>
+    <PackageTags>vectantic;vector-math;cosine-similarity;dot-product;embeddings;span;simd;tensorprimitives;dotnet;nlp;machine-learning</PackageTags>
+
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/JSebas-11/Vectantic</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/JSebas-11/Vectantic</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+
   </PropertyGroup>
+
+   <ItemGroup>
+    <None Include="..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="System.Numerics.Tensors" Version="10.0.7" />

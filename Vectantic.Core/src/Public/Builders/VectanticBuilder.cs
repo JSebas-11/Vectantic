@@ -28,7 +28,7 @@ public sealed class VectanticBuilder {
     }
 
     // -------------------- METHS --------------------
-    public async Task EnsureModelsAsync(IProgress<float>? progress = null, CancellationToken ct = default) {
+    public async Task EnsureModelAsync(IProgress<float>? progress = null, CancellationToken ct = default) {
         // DOWNLOAD
         var downloadResult = await DownloadWithRetries(progress, ct).ConfigureAwait(false);
 
