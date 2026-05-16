@@ -24,7 +24,7 @@ internal sealed class SemanticSearchService : ISemanticSearchService {
         var matches = new List<SemanticMatch>(topK);
         foreach (var (index, score) in topKList)
             matches.Add(new SemanticMatch() 
-                { Text = docs[index], Score = score }
+                { Text = docs[index], OriginalIndex = index, Score = score }
             );
 
         return new SemanticSearchResults() { Matches = matches, TotalCandidates = docs.Count };
@@ -36,7 +36,7 @@ internal sealed class SemanticSearchService : ISemanticSearchService {
         var matches = new List<SemanticMatch>(topK);
         foreach (var (index, score) in topKList)
             matches.Add(new SemanticMatch() 
-                { Score = score }
+                { OriginalIndex = index, Score = score }
             );
 
         return Task.FromResult(new SemanticSearchResults() 

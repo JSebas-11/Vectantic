@@ -14,6 +14,11 @@ public class SemanticMatch {
     public string? Text { get; internal init; }
     
     /// <summary>
+    /// Gets the index position within the original collection.
+    /// </summary>
+    public int OriginalIndex { get; internal init; }
+    
+    /// <summary>
     /// Gets the semantic similarity score of the match.
     /// </summary>
     /// <remarks>
