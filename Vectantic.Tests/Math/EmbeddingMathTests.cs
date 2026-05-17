@@ -209,4 +209,130 @@ public class EmbeddingMathTests {
         Assert.Throws<ArgumentException>(() => EmbeddingMath.TopK([1f, 0f, 0f], wrongLen, k: 1));
     }
     #endregion
+
+    #region AboveThreshold
+    [Fact]
+    public void AboveThreshold_AllCandidatesAboveThreshold_ReturnsAll() {
+        float[] query = [1f, 0f, 0f];
+        var candidates = new List<float[]> {
+            new[] { 1f, 0f, 0f }, new[] { 1f, 1f, 0f }
+        };
+
+        var result = EmbeddingMath.AboveThreshold(query, candidates, minScore: 0.5f);
+        Assert.Equal(2, result.Count);
+    }
+
+    [Fact]
+    public void AboveThreshold_NoCandidatesAboveThreshold_ReturnsEmpty() {
+        float[] query = [1f, 0f, 0f];
+        var candidates = new List<float[]> {
+            new[] { 0f, 1f, 0f }, new[] { -1f, 0f, 0f }
+        };
+
+        var result = EmbeddingMath.AboveThreshold(query, candidates, minScore: 0.5f);
+        Assert.Empty(result);
+    }
+
+     [Fact]
+    public void AboveThreshold_ScoreExactlyAtThreshold_IsIncluded() {
+        float[] query = [1f, 0f];
+        var candidates = new List<float[]> { new[] { 1f, 0f } };
+
+        var result = EmbeddingMath.AboveThreshold(query, candidates, minScore: 1.0f);
+
+        Assert.Single(result);
+        Assert.Equal(1f, result[0].Score, 5);
+    }
+
+    [Fact]
+    public void AboveThreshold_ResultsAreInDescendingOrder() {
+        float[] query = [1f, 0f, 0f];
+        var candidates = new List<float[]> {
+            new[] { 0f, 1f, 0f }, new[] { 1f, 1f, 0f }, new[] { 1f, 0f, 0f }
+        };
+
+        var result = EmbeddingMath.AboveThreshold(query, candidates, minScore: -1f);
+
+        for (int i = 0; i < result.Count - 1; i++)
+            Assert.True(result[i].Score >= result[i + 1].Score, $"Not descending at position {i}");
+    }
+
+    [Fact]
+    public void AboveThreshold_CorrectIndicesReturned() {
+        float[] query = [1f, 0f, 0f];
+        var candidates = new List<float[]> {
+            new[] { -1f, 0f, 0f }, new[] {  1f, 0f, 0f }, new[] {  0f, 1f, 0f }
+        };
+
+        var result = EmbeddingMath.AboveThreshold(query, candidates, minScore: 0.5f);
+
+        Assert.Single(result);
+        Assert.Equal(1, result[0].Index);
+    }
+
+     [Fact]
+    public void AboveThreshold_MinScoreNegativeOne_ReturnsAllCandidates() {
+        float[] query = [1f, 0f];
+        var candidates = new List<float[]> {
+            new[] {  1f, 0f }, new[] {  0f, 1f }, new[] { -1f, 0f }
+        };
+
+        var result = EmbeddingMath.AboveThreshold(query, candidates, minScore: -1f);
+
+        Assert.Equal(3, result.Count);
+    }
+
+     [Fact]
+    public void AboveThreshold_MinScoreBelowNegativeOne_ThrowsArgumentException() {
+        float[] query = [1f, 0f];
+        var candidates = new List<float[]> { new[] { 1f, 0f } };
+
+        Assert.Throws<ArgumentOutOfRangeException>(() =>
+            EmbeddingMath.AboveThreshold(query, candidates, minScore: -1.1f));
+    }
+
+    [Fact]
+    public void AboveThreshold_MinScoreAboveOne_ThrowsArgumentException() {
+        float[] query = [1f, 0f];
+        var candidates = new List<float[]> { new[] { 1f, 0f } };
+
+        Assert.Throws<ArgumentOutOfRangeException>(() =>
+            EmbeddingMath.AboveThreshold(query, candidates, minScore: 1.1f));
+    }
+
+
+    [Fact]
+    public void AboveThreshold_ZeroQueryVector_ThrowsArgumentException() {
+        var candidates = new List<float[]> { new[] { 1f, 0f } };
+
+        Assert.Throws<ArgumentException>(() =>
+            EmbeddingMath.AboveThreshold([0f, 0f], candidates, minScore: 0f));
+    }
+
+    [Fact]
+    public void AboveThreshold_ZeroCandidateVector_ThrowsArgumentException() {
+        float[] query = [1f, 0f];
+        var candidates = new List<float[]> { new[] { 1f, 0f }, new[] { 0f, 0f } };
+
+        Assert.Throws<ArgumentException>(() =>
+            EmbeddingMath.AboveThreshold(query, candidates, minScore: 0f));
+    }
+
+    [Fact]
+    public void AboveThreshold_CandidateWrongLength_ThrowsArgumentException() {
+        float[] query = [1f, 0f, 0f];
+        var candidates = new List<float[]> { new[] { 1f, 0f } };
+
+        Assert.Throws<ArgumentException>(() =>
+            EmbeddingMath.AboveThreshold(query, candidates, minScore: 0f));
+    }
+
+    [Fact]
+    public void AboveThreshold_EmptyQueryVector_ThrowsArgumentException() {
+        var candidates = new List<float[]> { new[] { 1f, 0f } };
+
+        Assert.Throws<ArgumentException>(() =>
+            EmbeddingMath.AboveThreshold([], candidates, minScore: 0f));
+    }
+    #endregion
 }
