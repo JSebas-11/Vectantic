@@ -5,12 +5,12 @@ using Vectantic.Semantic.Internal.Utilities;
 
 namespace Vectantic.Semantic.Internal.Tokenization;
 
-internal sealed class WordPieceTokenizer : ISemanticTokenizer {
+internal sealed class BertSemanticTokenizer : ISemanticTokenizer {
     // -------------------- INIT --------------------
     private readonly ResolvedSemanticModel _semanticModel;
     private readonly BertTokenizer _tokenizer;
 
-    public WordPieceTokenizer(ResolvedSemanticModel semanticModel) {
+    public BertSemanticTokenizer(ResolvedSemanticModel semanticModel) {
         _semanticModel = semanticModel; 
         _tokenizer = BertTokenizer.Create(
             GetVocabFilePath(_semanticModel.TokenizerPath), 
