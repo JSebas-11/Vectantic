@@ -9,3 +9,13 @@ internal sealed record SpecialTokens (
     string? BosToken,
     string? EosToken
 );
+
+internal sealed record SpecialTokensIds (
+    int? UnkToken,
+    int? SepToken,
+    int? PadToken,
+    int? MaskToken,
+    int? ClsToken,
+    int? BosToken,
+    int? EosToken
+);

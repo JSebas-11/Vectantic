@@ -13,4 +13,12 @@ internal static class SemanticConstants {
     internal const string ClsToken = "cls_token";
     internal const string BosToken = "bos_token";
     internal const string EosToken = "eos_token";
+
+    internal const string UnkTokenId = "unk_token_id";
+    internal const string SepTokenId = "sep_token_id";
+    internal const string PadTokenId = "pad_token_id";
+    internal const string MaskTokenId = "mask_token_id";
+    internal const string ClsTokenId = "cls_token_id";
+    internal const string BosTokenId = "bos_token_id";
+    internal const string EosTokenId = "eos_token_id";
 }

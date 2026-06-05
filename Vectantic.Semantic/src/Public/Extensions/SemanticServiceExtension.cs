@@ -104,10 +104,10 @@ public static class SemanticServiceExtension {
 
         // POOLING
         switch (preset.Pooling) {
-            case Enums.PoolingStrategy.Cls:
+            case PoolingStrategy.Cls:
                 services.AddSingleton<IPoolingStrategy, ClsPooling>();
                 break;
-            case Enums.PoolingStrategy.Mean:
+            case PoolingStrategy.Mean:
                 services.AddSingleton<IPoolingStrategy, MeanPooling>();
                 break;
             default:

@@ -21,6 +21,10 @@ internal static class SemanticModelFactory {
             ? ParseSpecialTokens(tokensMapsPath)
             : SpecialTokensFactory.FromTokenizationDefault(preset.Tokenization);
 
+        var specialTokensIds = preset.Tokenization == Enums.TokenizationType.Bpe
+            ? ParseSpecialTokensIds(tokenizerPath, specialTokens)
+            : null;
+
         return new(
             downloadResult.ModelPath,
             preset.MaxTokens,
@@ -30,6 +34,7 @@ internal static class SemanticModelFactory {
             preset.Pooling,
             preset.Tokenization,
             specialTokens,
+            specialTokensIds,
             preset.RequiresTokenTypeIds
         );
     }
@@ -39,5 +44,26 @@ internal static class SemanticModelFactory {
         using var file = File.OpenRead(path);
         using var json = JsonDocument.Parse(file);
         return SpecialTokensFactory.FromJson(json);
+    }
+    private static SpecialTokensIds ParseSpecialTokensIds(string basePath, SpecialTokens tokens) {
+        var configPath = Path.Combine(basePath, "config.json");
+        var vocabPath = Path.Combine(basePath, "vocab.json");
+
+        if (File.Exists(configPath)) {
+            using var file = File.OpenRead(configPath);
+            using var json = JsonDocument.Parse(file);
+            var ids = SpecialTokensFactory.IdsFromJson(json);
+            
+            if (ids.PadToken is not null && ids.BosToken is not null && ids.EosToken is not null)
+                return ids;
+        }
+        
+        if (File.Exists(vocabPath)) {
+            using var file = File.OpenRead(vocabPath);
+            using var json = JsonDocument.Parse(file);
+            return SpecialTokensFactory.IdsFromJson(json, tokens);
+        }
+
+        throw new VectanticInvalidConstructionException("Vocab file was not found to get special tokens IDs");
     }
 }
