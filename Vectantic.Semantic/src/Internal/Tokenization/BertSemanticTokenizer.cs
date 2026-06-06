@@ -18,10 +18,13 @@ internal sealed class BertSemanticTokenizer : ISemanticTokenizer {
                 LowerCaseBeforeTokenization = _semanticModel.LowerCase,
                 ApplyBasicTokenization = true,
                 SplitOnSpecialTokens = true,
-                ClassificationToken = "[CLS]",
-                SeparatorToken = "[SEP]",
-                PaddingToken = "[PAD]",
-                UnknownToken = "[UNK]"
+                // SpecialTokensFactory & SemanticModelFactory makes sure at least default values are provided
+                // IDs for tokens are detected automatically from vocab.txt
+                ClassificationToken = _semanticModel.SpecialTokens.ClsToken!,
+                SeparatorToken = _semanticModel.SpecialTokens.SepToken!,
+                PaddingToken = _semanticModel.SpecialTokens.PadToken!,
+                UnknownToken = _semanticModel.SpecialTokens.UnkToken!,
+                MaskingToken = _semanticModel.SpecialTokens.MaskToken!
             }
         );
     }
