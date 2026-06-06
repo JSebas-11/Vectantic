@@ -23,7 +23,7 @@ namespace Vectantic.Semantic.Builders;
 ///         "https://example.com/tokenizer.json"
 ///     })
 ///     .WithPoolingStrategy(PoolingStrategy.Mean)
-///     .WithTokenizationType(TokenizationType.WordPiece)
+///     .WithTokenizationType(TokenizationType.Bert)
 ///     .Build();
 /// </code>
 /// </example>
@@ -37,7 +37,7 @@ public class PresetBuilder {
     private string _outputTensorName = "last_hidden_state";
     private List<Uri> _tokenizerFiles = [];
     private PoolingStrategy _pooling = PoolingStrategy.Mean;
-    private TokenizationType _tokenization = TokenizationType.WordPiece;
+    private TokenizationType? _tokenization = null;
     private int? _maxTokens;
     #endregion
     
@@ -58,9 +58,12 @@ public class PresetBuilder {
     /// </remarks>
     public VectanticPreset Build() {
         StringGuard.RequireOrException(_id, "Id", "is required and it was not provided.");
-        
+            
         if (_modelUri is null)
             throw new VectanticInvalidConstructionException("ModelUrl is required and it was not provided.");
+
+        if (_tokenization is null)
+            throw new VectanticInvalidConstructionException("TokenizationType was not defined.");
         
         StringGuard.RequireOrException(_checksum, "Checksum", "is required and it was not provided.");
         
@@ -72,7 +75,7 @@ public class PresetBuilder {
             _lowercase,
             _outputTensorName,
             _tokenizerFiles.AsReadOnly(), 
-            _pooling, _tokenization,
+            _pooling, (TokenizationType)_tokenization,
             _maxTokens,
             _requiresTokenTypeIds
         );
