@@ -55,6 +55,15 @@ public sealed partial class VectanticPreset {
         .WithTokenizationType(TokenizationType.Bert)
         .Build();
 
+    /// <summary>
+    /// Gets the built-in preset configuration for the sentence-transformers/all-roberta-large-v1 model.
+    /// </summary>
+    /// <remarks>
+    /// This preset uses BPE tokenization with mean pooling and produces 1024-dimensional
+    /// embeddings optimized for semantic similarity and retrieval tasks.
+    /// 
+    /// Token type IDs are disabled because RoBERTa models do not use segment embeddings.
+    /// </remarks>
     public static VectanticPreset AllRobertaLargeV1 { get; } = new PresetBuilder()
         .WithId("all-roberta-large-v1")
         .WithModelUrl("https://huggingface.co/sentence-transformers/all-roberta-large-v1/resolve/main/onnx/model.onnx")

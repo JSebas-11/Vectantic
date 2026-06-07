@@ -15,7 +15,7 @@ internal sealed class SemanticSearchService : ISemanticSearchService {
 
     // -------------------- METHS --------------------
     public async Task<SemanticSearchResults> SearchAsync(string query, IReadOnlyList<string> docs, int topK) {
-        var (queryEmbed, docsEmbed) = await GetEmbeddingsAsync(query, docs);
+        var (queryEmbed, docsEmbed) = await GetEmbeddingsAsync(query, docs).ConfigureAwait(false);
         var topKList = TryMath(
             () => EmbeddingMath.TopK(queryEmbed, docsEmbed, topK)
         );
@@ -24,7 +24,7 @@ internal sealed class SemanticSearchService : ISemanticSearchService {
     }
 
     public async Task<SemanticSearchResults> SearchAsync(string query, IReadOnlyList<string> docs, float minScore) {
-        var (queryEmbed, docsEmbed) = await GetEmbeddingsAsync(query, docs);
+        var (queryEmbed, docsEmbed) = await GetEmbeddingsAsync(query, docs).ConfigureAwait(false);
         var minScoreList = TryMath(
             () => EmbeddingMath.AboveThreshold(queryEmbed, docsEmbed, minScore)
         );

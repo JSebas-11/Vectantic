@@ -6,7 +6,13 @@ namespace Vectantic.Core.Configuration;
 /// <remarks>
 /// This type configures the infrastructure behavior of Vectantic.Core, including
 /// authentication, cache management, download policies, and hardware acceleration.
-/// These settings are typically registered once during application startup.
+///
+/// Default values:
+/// - AccessToken = null
+/// - CacheDirectory = LocalApplicationData/Vectantic/models
+/// - DownloadTimeout = 5 minutes
+/// - MaxRetries = 3
+/// - UseGpu = false
 /// </remarks>
 /// <example>
 /// <code>
@@ -28,6 +34,9 @@ public sealed class VectanticOptions {
     /// <summary>
     /// Gets or sets the HuggingFace access token used for authenticated model downloads.
     /// </summary>
+    /// <value>
+    /// <see langword="null"/> by default.
+    /// </value>
     /// <remarks>
     /// This value is required when downloading gated or private models from HuggingFace.
     /// Public models can typically be downloaded without authentication.
@@ -37,6 +46,14 @@ public sealed class VectanticOptions {
     /// <summary>
     /// Gets or sets the local directory used to cache downloaded model files.
     /// </summary>
+    /// <value>
+    /// Defaults to:
+    /// <list type="bullet">
+    /// <item><description>Windows: %LOCALAPPDATA%\Vectantic\models</description></item>
+    /// <item><description>Linux: ~/.local/share/Vectantic/models</description></item>
+    /// <item><description>macOS: ~/Library/Application Support/Vectantic/models</description></item>
+    /// </list>
+    /// </value>
     /// <remarks>
     /// Downloaded ONNX models and auxiliary assets are persisted in this directory
     /// to avoid repeated network downloads across application runs.
@@ -46,6 +63,9 @@ public sealed class VectanticOptions {
     /// <summary>
     /// Gets or sets the maximum duration allowed for model download operations.
     /// </summary>
+    /// <value>
+    /// Five minutes by default.
+    /// </value>
     /// <remarks>
     /// Applies to individual HTTP download requests performed by the model downloader.
     /// </remarks>
@@ -54,6 +74,9 @@ public sealed class VectanticOptions {
     /// <summary>
     /// Gets or sets the maximum number of retry attempts for failed download operations.
     /// </summary>
+    /// <value>
+    /// Three retries by default.
+    /// </value>
     /// <remarks>
     /// Retries are performed for transient network failures and unsuccessful HTTP responses.
     /// </remarks>
@@ -62,12 +85,15 @@ public sealed class VectanticOptions {
     /// <summary>
     /// Gets or sets a value indicating whether GPU acceleration should be enabled for ONNX inference.
     /// </summary>
+    /// <value>
+    /// <see langword="false"/> by default.
+    /// </value>
     /// <remarks>
-    /// WARNING: GPU acceleration is not available in v1.
-    /// </remarks>
-    /// <remarks>
-    /// When enabled, the runtime attempts to initialize a GPU execution provider if supported
-    /// by the current environment and ONNX Runtime installation.
+    /// GPU acceleration is currently not available in v1.
+    ///
+    /// When enabled in future versions, the runtime will attempt to initialize
+    /// a GPU execution provider if supported by the current environment and
+    /// ONNX Runtime installation.
     /// </remarks>
     public bool UseGpu { get; set; } = false;
 }

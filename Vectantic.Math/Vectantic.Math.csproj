@@ -7,7 +7,7 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
 
     <PackageId>Vectantic.Math</PackageId>
-    <Version>1.0.0</Version>
+    <Version>1.1.0</Version>
     <Authors>Sebastian Delgado (JSebas-11)</Authors>
     <Company>None</Company>
     <PackageReadmeFile>README.md</PackageReadmeFile>
@@ -20,6 +20,13 @@
     <RepositoryUrl>https://github.com/JSebas-11/Vectantic</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+
+    <PackageReleaseNotes>
+    v1.1.0
+
+    NEW FEATURES
+    - Added EmbeddingMath.AboveThreshold() to retrieve candidates whose cosine similarity exceeds a minimum score.
+    </PackageReleaseNotes>
 
   </PropertyGroup>
 
