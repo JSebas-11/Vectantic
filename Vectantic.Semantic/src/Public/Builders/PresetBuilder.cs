@@ -35,6 +35,7 @@ public class PresetBuilder {
     private bool _lowercase = true;
     private bool _requiresTokenTypeIds = true;
     private string _outputTensorName = "last_hidden_state";
+    private Dictionary<Uri, string> _modelFiles = [];
     private List<Uri> _tokenizerFiles = [];
     private PoolingStrategy _pooling = PoolingStrategy.Mean;
     private TokenizationType? _tokenization = null;
@@ -74,7 +75,7 @@ public class PresetBuilder {
             _id!, _modelUri, _checksum!, 
             _lowercase,
             _outputTensorName,
-            _tokenizerFiles.AsReadOnly(), 
+            _modelFiles.AsReadOnly(), _tokenizerFiles.AsReadOnly(), 
             _pooling, (TokenizationType)_tokenization,
             _maxTokens,
             _requiresTokenTypeIds
@@ -208,6 +209,51 @@ public class PresetBuilder {
     }
     
     /// <summary>
+    /// Replaces the collection of additional model files using string URI values.
+    /// </summary>
+    /// <param name="modelFiles">
+    /// A collection of model file URIs and their corresponding SHA-256 checksums.
+    /// </param>
+    /// <returns>
+    /// The current <see cref="PresetBuilder"/> instance.
+    /// </returns>
+    /// <exception cref="VectanticInvalidConstructionException">
+    /// Thrown when one or more URIs are invalid.
+    /// </exception>
+    /// <remarks>
+    /// These files are downloaded alongside the primary ONNX model and are
+    /// typically required by models that store weights in external files.
+    /// </remarks>
+    public PresetBuilder WithModelFiles(IDictionary<string, string> modelFiles) {
+        _modelFiles = UriGuard.CreateDictOrException(modelFiles, "ModelFiles");
+        return this;
+    }
+
+    /// <summary>
+    /// Replaces the collection of additional model files.
+    /// </summary>
+    /// <param name="modelFiles">
+    /// A collection of model file URIs and their corresponding SHA-256 checksums.
+    /// </param>
+    /// <returns>
+    /// The current <see cref="PresetBuilder"/> instance.
+    /// </returns>
+    /// <exception cref="VectanticInvalidConstructionException">
+    /// Thrown when one or more URIs are invalid.
+    /// </exception>
+    /// <remarks>
+    /// These files are downloaded alongside the primary ONNX model and are
+    /// typically required by models that store weights in external files.
+    ///
+    /// The dictionary key represents the file download URI and the value
+    /// represents the expected SHA-256 checksum.
+    /// </remarks>
+    public PresetBuilder WithModelFiles(IDictionary<Uri, string> modelFiles) {
+        _modelFiles = UriGuard.CreateDictOrException(modelFiles, "ModelFiles");
+        return this;
+    }
+    
+    /// <summary>
     /// Replaces the tokenizer resource collection using string URI values.
     /// </summary>
     /// <param name="tokenizerFiles">
@@ -256,6 +302,7 @@ public class PresetBuilder {
     /// <remarks>
     /// Duplicate tokenizer resource URIs are ignored.
     /// </remarks>
+    [Obsolete("Use WithTokenizerFiles(...) instead. AddTokenizerFile(...) will be removed in v2.0.0.")]
     public PresetBuilder AddTokenizerFile(Uri tokenizerFile) {
         UriGuard.ValidateOrException(tokenizerFile, "TokenizerFile");
 
@@ -280,6 +327,7 @@ public class PresetBuilder {
     /// <remarks>
     /// Duplicate tokenizer resource URIs are ignored.
     /// </remarks>
+    [Obsolete("Use WithTokenizerFiles(...) instead. AddTokenizerFile(...) will be removed in v2.0.0.")]
     public PresetBuilder AddTokenizerFile(string tokenizerFile) {
         UriGuard.ValidateOrException(tokenizerFile, "TokenizerFile");
         var uri = new Uri(tokenizerFile);

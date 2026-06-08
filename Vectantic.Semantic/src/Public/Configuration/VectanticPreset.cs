@@ -1,6 +1,7 @@
 using Vectantic.Core.Configuration;
 using Vectantic.Semantic.Builders;
 using Vectantic.Semantic.Enums;
+using Vectantic.Semantic.Internal.Constants;
 
 namespace Vectantic.Semantic.Configuration;
 
@@ -39,6 +40,22 @@ public sealed partial class VectanticPreset : VectanticModelInfo {
     /// This tensor is consumed by the pooling strategy to generate the final embedding vector.
     /// </remarks>
     public string OutputTensorName { get; }
+
+    /// <summary>
+    /// Gets the additional model files required for inference.
+    /// </summary>
+    /// <remarks>
+    /// Some ONNX models depend on supplementary files in addition to the primary
+    /// model file referenced by <see cref="VectanticModelInfo.ModelUrl"/>.
+    ///
+    /// Common examples include external ONNX data files referenced by the model,
+    /// such as <c>model.onnx_data</c>. These files are downloaded and cached
+    /// automatically during model initialization.
+    ///
+    /// The dictionary key represents the file download URI, while the value
+    /// contains the expected SHA-256 checksum used for integrity verification.
+    /// </remarks>
+    public IReadOnlyDictionary<Uri, string> ModelFiles { get; }
 
     /// <summary>
     /// Gets the tokenizer resource files required for text tokenization.
@@ -89,15 +106,17 @@ public sealed partial class VectanticPreset : VectanticModelInfo {
         string checksum,
         bool lowercase,
         string outputTensorName,
+        IReadOnlyDictionary<Uri, string> modelFiles,
         IReadOnlyList<Uri> tokenizerFiles,
         PoolingStrategy pooling,
         TokenizationType tokenization,
         int? maxTokens,
         bool requiresTokenTypeIds) 
-        : base(id, modelUrl, checksum, TokenizerFiles2Dict(tokenizerFiles))
+        : base(id, modelUrl, checksum, DefineExtraFiles(modelFiles, tokenizerFiles))
     {
         LowerCase = lowercase;
         OutputTensorName = outputTensorName;
+        ModelFiles = modelFiles;
         TokenizerFiles = tokenizerFiles;
         Pooling = pooling;
         Tokenization = tokenization;
@@ -105,6 +124,28 @@ public sealed partial class VectanticPreset : VectanticModelInfo {
         MaxTokens = maxTokens;
     }
 
-    private static IReadOnlyDictionary<string, Uri> TokenizerFiles2Dict(IReadOnlyList<Uri> tokFiles)
-        => tokFiles.ToDictionary(uri => Path.GetFileName(uri.AbsolutePath), uri => uri);
+    private static IReadOnlyList<DownloadFileInfo> DefineExtraFiles(
+        IReadOnlyDictionary<Uri, string> modelFiles, IReadOnlyList<Uri> tokFiles
+    ) {
+        var modelCount = modelFiles.Count;
+        var tokCount = tokFiles.Count;
+        var maxFiles = Greater(modelCount, tokCount);
+
+        var extraFiles = new List<DownloadFileInfo>(modelCount + tokCount);
+
+        for (int i = 0; i < maxFiles; i++) {
+            if (i < modelCount) {
+                var modelFile = modelFiles.ElementAt(i);
+                extraFiles.Add(new DownloadFileInfo(Path.GetFileName(modelFile.Key.AbsolutePath), modelFile.Key, "/", modelFile.Value));
+            }
+            if (i < tokCount) {
+                var url = tokFiles[i];
+                extraFiles.Add(new DownloadFileInfo(Path.GetFileName(url.AbsolutePath), url, SemanticConstants.TokenizerDirKey));
+            }
+        }
+
+        return extraFiles;
+    }
+
+    private static int Greater(params int[] numbers) => numbers.Max();
 }

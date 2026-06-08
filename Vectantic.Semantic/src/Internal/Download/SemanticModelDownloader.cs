@@ -22,27 +22,32 @@ internal sealed class SemanticModelDownloader : IModelDownloader {
         try {
             // PATHS
             var rootDir = Path.Combine(opts.CacheDirectory, info.Id);
-            var tokenizerDir = Path.Combine(rootDir, SemanticConstants.TokenizerDirKey);
             var modelPath = Path.Combine(rootDir, Path.GetFileName(info.ModelUrl.AbsolutePath));
 
-            // DOWNLOADS
+            // DOWNLOADS & CHECKSUMS
             var totalDownloads = info.ExtraFiles.Count + 1;
             var downloads = new List<Task>(totalDownloads) {
                 DownloadIfNotCached(info.ModelUrl, modelPath, progress, ct)
             };
+            var checksums = new List<Task>(totalDownloads) {
+                VerifyChecksum(modelPath, info.Checksum)
+            };
 
             foreach (var extraFile in info.ExtraFiles) {
-                var filePath = Path.Combine(tokenizerDir, extraFile.Key);
-                downloads.Add(DownloadIfNotCached(extraFile.Value, filePath, null, ct));
+                var filePath = Path.Combine(rootDir, extraFile.InternalDirectory, extraFile.FileName);
+                downloads.Add(DownloadIfNotCached(extraFile.DownloadUrl, filePath, null, ct));
+
+                if (extraFile.RequireChecksum)
+                    checksums.Add(VerifyChecksum(filePath, extraFile.Checksum!));
             }
-            await Task.WhenAll(downloads).ConfigureAwait(false);
+            await Task.WhenAll(downloads).ConfigureAwait(false); 
+            await Task.WhenAll(checksums).ConfigureAwait(false);
 
-            // CHECKSUM
-            if (!await _fileDownloader.VerifyChecksumAsync(modelPath, info.Checksum).ConfigureAwait(false))
-                throw new VectanticModelException("Model was downloaded, however its checksum verification failed.");
-
+            // TokenizerPath hardcoded as there is compatibility for tokenizer and model files for now
             return new DownloadResult(
-                modelPath, new Dictionary<string, string> { [SemanticConstants.TokenizerDirKey] = tokenizerDir });
+                modelPath, new Dictionary<string, string> 
+                { [SemanticConstants.TokenizerDirKey] = Path.Combine(rootDir, SemanticConstants.TokenizerDirKey) }
+            );
         }
         catch (VectanticModelException) { throw; }
         catch (VectanticDownloadException) { throw; }
@@ -56,5 +61,9 @@ internal sealed class SemanticModelDownloader : IModelDownloader {
         if (_fileDownloader.IsCached(path)) return;
 
         await _fileDownloader.DownloadFileAsync(src, path, progress, ct).ConfigureAwait(false);
+    }
+    private async Task VerifyChecksum(string path, string checksum) {
+        if (!await _fileDownloader.VerifyChecksumAsync(path, checksum).ConfigureAwait(false))
+            throw new VectanticModelException($"File ({path}) was downloaded, however its checksum verification failed.");
     }
 }
