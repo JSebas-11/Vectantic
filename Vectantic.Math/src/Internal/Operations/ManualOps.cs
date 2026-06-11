@@ -70,4 +70,22 @@ internal static class ManualOps {
 
         return kArray.AsReadOnly();
     }
+
+    public static IReadOnlyList<(int Index, float Score)> AboveThreshold(
+        ReadOnlySpan<float> query, IReadOnlyList<float[]> candidates, float minScore)
+    {
+        VectorGuard.ValidMinScoreOrException(minScore);
+
+        var results = new List<(int Index, float Score)>();
+    
+        for (int i = 0; i < candidates.Count; i++) {
+            var score = CosineSimilarity(query, candidates[i]);
+
+            if (score >= minScore)
+                results.Add((i, score));
+        }
+
+        results.Sort((a, b) => b.Score.CompareTo(a.Score));
+        return results.AsReadOnly();
+    }
 }

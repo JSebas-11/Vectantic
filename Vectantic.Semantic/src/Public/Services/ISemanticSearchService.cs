@@ -47,6 +47,30 @@ public interface ISemanticSearchService {
     Task<SemanticSearchResults> SearchAsync(string query, IReadOnlyList<string> docs, int topK);
 
     /// <summary>
+    /// Performs semantic similarity search over a collection of text documents, returning all matches above a minimum score threshold.
+    /// </summary>
+    /// <param name="query">The query text to compare semantically against the candidate documents.</param>
+    /// <param name="docs">The candidate documents to evaluate.</param>
+    /// <param name="minScore">
+    /// The minimum cosine similarity score a candidate must meet to be included in the results.
+    /// For normalized vectors this ranges from 0 to 1. For unnormalized vectors from -1 to 1.
+    /// </param>
+    /// <returns>
+    /// A task containing <see cref="SemanticSearchResults"/> with all matches at or above <paramref name="minScore"/>, in descending score order.
+    /// Returns an empty result set if no candidates meet the threshold — this is not an error.
+    /// </returns>
+    /// <exception cref="VectanticMathException">
+    /// Thrown when <paramref name="minScore"/> is outside the valid range of -1 to 1.
+    /// </exception>
+    /// <exception cref="VectanticException">
+    /// Thrown when embedding generation or semantic comparison fails unexpectedly.
+    /// </exception>
+    /// <remarks>
+    /// Unlike the topK overload, the number of results is variable and depends on how many candidates meet the threshold.
+    /// </remarks>
+    Task<SemanticSearchResults> SearchAsync(string query, IReadOnlyList<string> docs, float minScore);
+
+    /// <summary>
     /// Performs semantic similarity search over embedding vectors.
     /// </summary>
     /// <param name="query">
@@ -68,4 +92,29 @@ public interface ISemanticSearchService {
     /// Thrown when embedding generation or semantic comparison fails.
     /// </exception>
     Task<SemanticSearchResults> SearchAsync(float[] query, IReadOnlyList<float[]> docs, int topK);
+
+     /// <summary>
+    /// Performs semantic similarity search over pre-computed embedding vectors, returning all matches above a minimum score threshold.
+    /// </summary>
+    /// <param name="query">The query embedding vector to compare against candidates.</param>
+    /// <param name="docs">The candidate embedding vectors to evaluate.</param>
+    /// <param name="minScore">
+    /// The minimum cosine similarity score a candidate must meet to be included in the results.
+    /// For normalized vectors this ranges from 0 to 1. For unnormalized vectors from -1 to 1.
+    /// </param>
+    /// <returns>
+    /// A task containing <see cref="SemanticSearchResults"/> with all matches at or above <paramref name="minScore"/>, in descending score order.
+    /// <see cref="SemanticMatch.Text"/> will be null as no source text is available.
+    /// Returns an empty result set if no candidates meet the threshold — this is not an error.
+    /// </returns>
+    /// <exception cref="VectanticMathException">
+    /// Thrown when <paramref name="minScore"/> is outside the valid range of -1 to 1.
+    /// </exception>
+    /// <exception cref="VectanticException">
+    /// Thrown when semantic comparison fails unexpectedly.
+    /// </exception>
+    /// <remarks>
+    /// Use this overload when embeddings are pre-computed and cached, avoiding redundant embedding generation.
+    /// </remarks>
+    Task<SemanticSearchResults> SearchAsync(float[] query, IReadOnlyList<float[]> docs, float minScore);
 }

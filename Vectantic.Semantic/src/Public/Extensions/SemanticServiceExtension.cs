@@ -5,6 +5,7 @@ using Vectantic.Core.Exceptions;
 using Vectantic.Core.Internal.Extensions;
 using Vectantic.Core.Internal.Factories;
 using Vectantic.Semantic.Configuration;
+using Vectantic.Semantic.Enums;
 using Vectantic.Semantic.Internal.Download;
 using Vectantic.Semantic.Internal.Factories;
 using Vectantic.Semantic.Internal.Pooling;
@@ -90,8 +91,12 @@ public static class SemanticServiceExtension {
 
         // TOKENIZATION
         switch (preset.Tokenization) {
-            case Enums.TokenizationType.WordPiece:
-                services.AddSingleton<ISemanticTokenizer, WordPieceTokenizer>();
+            case TokenizationType.WordPiece:
+            case TokenizationType.Bert:
+                services.AddSingleton<ISemanticTokenizer, BertSemanticTokenizer>();
+                break;
+            case TokenizationType.Bpe:
+                services.AddSingleton<ISemanticTokenizer, BpeSemanticTokenizer>();
                 break;
             default:
                 throw new VectanticException("Tokenization type provided is not supported.");
@@ -99,10 +104,10 @@ public static class SemanticServiceExtension {
 
         // POOLING
         switch (preset.Pooling) {
-            case Enums.PoolingStrategy.Cls:
+            case PoolingStrategy.Cls:
                 services.AddSingleton<IPoolingStrategy, ClsPooling>();
                 break;
-            case Enums.PoolingStrategy.Mean:
+            case PoolingStrategy.Mean:
                 services.AddSingleton<IPoolingStrategy, MeanPooling>();
                 break;
             default:

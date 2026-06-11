@@ -180,6 +180,66 @@ public static class EmbeddingMath {
         
         return kArray.AsReadOnly();
     }
+
+    /// <summary>
+    /// Computes all candidate vectors whose cosine similarity score meets or exceeds the specified threshold.
+    /// </summary>
+    /// <param name="query">
+    /// The query embedding vector.
+    /// </param>
+    /// <param name="candidates">
+    /// The candidate embedding vectors to compare against.
+    /// </param>
+    /// <param name="minScore">
+    /// The minimum cosine similarity score required for a candidate to be included in the results.
+    /// For normalized vectors, similarity scores typically range from 0 to 1.
+    /// For unnormalized vectors, similarity scores typically range from -1 to 1.
+    /// </param>
+    /// <returns>
+    /// A collection containing the candidate index and similarity score of all matching vectors,
+    /// ordered from highest to lowest similarity.
+    /// </returns>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// Thrown when <paramref name="minScore"/> is outside the valid cosine similarity range.
+    /// </exception>
+    /// <exception cref="ArgumentException">
+    /// Thrown when candidate vectors have incompatible dimensions
+    /// or when any vector has zero magnitude.
+    /// </exception>
+    /// <remarks>
+    /// This method evaluates all candidate vectors and returns only those whose cosine similarity
+    /// satisfies the provided threshold. Results are sorted in descending similarity order.
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// var matches = EmbeddingMath.AboveThreshold(
+    ///     queryEmbedding,
+    ///     candidateEmbeddings,
+    ///     minScore: 0.55f);
+    /// </code>
+    /// </example>
+    public static IReadOnlyList<(int Index, float Score)> AboveThreshold(
+        ReadOnlySpan<float> query, IReadOnlyList<float[]> candidates, float minScore)
+    {
+        VectorGuard.ValidMinScoreOrException(minScore);
+        
+        var queryMag = Magnitude(query);
+        VectorGuard.NonZeroOrException(queryMag, "Query Magnitude");
+        
+        var candidatesMag = PrevalidateCandidatesMagnitude(candidates, query.Length);
+        
+        var candidatesCount = candidates.Count;
+        var results = new List<(int Index, float Score)>();
+        for (int i = 0; i < candidatesCount; i++) {
+            var score = TensorPrimitives.Dot(query, candidates[i]) / (queryMag * candidatesMag[i]);
+
+            if (score >= minScore) 
+                results.Add((i, score));
+        }
+        
+        results.Sort((a, b) => b.Score.CompareTo(a.Score));
+        return results.AsReadOnly();
+    }
     #endregion
     
     #region INNER METHS

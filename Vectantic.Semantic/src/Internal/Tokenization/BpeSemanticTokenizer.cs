@@ -1,29 +1,31 @@
 using Microsoft.ML.Tokenizers;
 using Vectantic.Semantic.Exceptions;
+using Vectantic.Semantic.Internal.Factories;
 using Vectantic.Semantic.Internal.Models;
 using Vectantic.Semantic.Internal.Utilities;
 
 namespace Vectantic.Semantic.Internal.Tokenization;
 
-internal sealed class WordPieceTokenizer : ISemanticTokenizer {
+internal sealed class BpeSemanticTokenizer : ISemanticTokenizer {
     // -------------------- INIT --------------------
     private readonly ResolvedSemanticModel _semanticModel;
-    private readonly BertTokenizer _tokenizer;
+    private readonly BpeTokenizer _tokenizer;
+    private readonly Dictionary<string, int> _specialTokens;
 
-    public WordPieceTokenizer(ResolvedSemanticModel semanticModel) {
-        _semanticModel = semanticModel; 
-        _tokenizer = BertTokenizer.Create(
-            GetVocabFilePath(_semanticModel.TokenizerPath), 
-            new BertOptions {
-                LowerCaseBeforeTokenization = _semanticModel.LowerCase,
-                ApplyBasicTokenization = true,
-                SplitOnSpecialTokens = true,
-                ClassificationToken = "[CLS]",
-                SeparatorToken = "[SEP]",
-                PaddingToken = "[PAD]",
-                UnknownToken = "[UNK]"
-            }
-        );
+    public BpeSemanticTokenizer(ResolvedSemanticModel semanticModel) {
+        _semanticModel = semanticModel;
+        _specialTokens = SpecialTokensFactory.SpecialTokensDict(_semanticModel.SpecialTokens, _semanticModel.SpecialTokensIds);
+        var (vocab, merges) = GetVocabAndMergesPath(_semanticModel.TokenizerPath);
+        var opts = new BpeOptions(vocab, merges) {
+            ByteLevel = true,
+            FuseUnknownTokens = false,
+            // SpecialTokensFactory & SemanticModelFactory makes sure at least default values are provided
+            UnknownToken = _semanticModel.SpecialTokens.UnkToken,
+            BeginningOfSentenceToken = _semanticModel.SpecialTokens.BosToken,
+            EndOfSentenceToken = _semanticModel.SpecialTokens.EosToken,
+            SpecialTokens = _specialTokens
+        };
+        _tokenizer = BpeTokenizer.Create(opts);
     }
 
     // -------------------- METHS --------------------
@@ -31,19 +33,28 @@ internal sealed class WordPieceTokenizer : ISemanticTokenizer {
         TokenizerOutput tokFunc() {
             var ids = GetIds(text);
             
-            var padId = (long)_tokenizer.PaddingTokenId;
+            // SemanticModelFactory makes sure PAD, BOF, EOF tokens are present, otherwise it will throw an exception
+            var padId = (long)_specialTokens[_semanticModel.SpecialTokens.PadToken!];
+            var bosId = (long)_specialTokens[_semanticModel.SpecialTokens.BosToken!];
+            var eofId = (long)_specialTokens[_semanticModel.SpecialTokens.EosToken!];
             var idsCount = ids.Count;
-            var maxTokens = _semanticModel.MaxTokens ?? idsCount;
+            var maxTokens = _semanticModel.MaxTokens ?? (idsCount+2);
             
             var inputIds = new long[1, maxTokens];
             var attentionMask = new long[1, maxTokens];
 
             for (int i = 0; i < maxTokens; i++) inputIds[0, i] = padId;
 
+            inputIds[0, 0] = bosId;
+            attentionMask[0, 0] = 1L;
+
             for (int i = 0; i < idsCount; i++) {
-                inputIds[0, i] = (long)ids[i];
-                attentionMask[0, i] = 1L;
+                inputIds[0, i+1] = (long)ids[i];
+                attentionMask[0, i+1] = 1L;
             }
+
+            inputIds[0, idsCount+1] = eofId;
+            attentionMask[0, idsCount+1] = 1L;
 
             return new TokenizerOutput(inputIds, attentionMask);
         }
@@ -59,8 +70,12 @@ internal sealed class WordPieceTokenizer : ISemanticTokenizer {
             var txtsCount = texts.Count;
 
             var (MaxLen, Ids) = GetIdsAndMaxLen(texts, txtsCount);
+            MaxLen += 2;
 
-            var padId = (long)_tokenizer.PaddingTokenId;
+            // SemanticModelFactory makes sure PAD, BOF, EOF tokens are present, otherwise it will throw an exception
+            var padId = (long)_specialTokens[_semanticModel.SpecialTokens.PadToken!];
+            var bosId = (long)_specialTokens[_semanticModel.SpecialTokens.BosToken!];
+            var eofId = (long)_specialTokens[_semanticModel.SpecialTokens.EosToken!];
 
             var inputIds = new long[txtsCount, MaxLen];
             var attentionMask = new long[txtsCount, MaxLen];
@@ -71,10 +86,16 @@ internal sealed class WordPieceTokenizer : ISemanticTokenizer {
 
                 for (int j = 0; j < MaxLen; j++) inputIds[i, j] = padId;
 
+                inputIds[i, 0] = bosId;
+                attentionMask[i, 0] = 1L;
+
                 for (int j = 0; j < batchIdsCount; j++) {
-                    inputIds[i, j] = (long)batchIds[j];
-                    attentionMask[i, j] = 1L;
+                    inputIds[i, j+1] = (long)batchIds[j];
+                    attentionMask[i, j+1] = 1L;
                 }
+
+                inputIds[i, batchIdsCount+1] = eofId;
+                attentionMask[i, batchIdsCount+1] = 1L;
             }
 
             return new TokenizerOutput(inputIds, attentionMask);
@@ -87,15 +108,19 @@ internal sealed class WordPieceTokenizer : ISemanticTokenizer {
     }
 
     // -------------------- INNER METHS --------------------
-    private static string GetVocabFilePath(string path) {
-        var vocabPath = Path.Combine(path, "vocab.txt");
+    private static (string vocab, string merges) GetVocabAndMergesPath(string path) {
+        var vocabPath = Path.Combine(path, "vocab.json");
+        var mergesPath = Path.Combine(path, "merges.txt");
         
-        if (!File.Exists(vocabPath))
-            throw new VectanticTokenizationException($"Vocab.txt was not found at {vocabPath}.");
+        if (!File.Exists(vocabPath)) 
+            throw new VectanticTokenizationException($"Vocab file was not found at {vocabPath}.");
 
-        return vocabPath;
+        if (!File.Exists(mergesPath)) 
+            throw new VectanticTokenizationException($"Merges file was not found at {mergesPath}.");
+            
+        return (vocabPath, mergesPath);
     }
-    
+
     private IReadOnlyList<int> GetIds(string text) {
         if (string.IsNullOrWhiteSpace(text))
             throw new VectanticTokenizationException("Text to tokenize was not provided.");
@@ -103,11 +128,12 @@ internal sealed class WordPieceTokenizer : ISemanticTokenizer {
         IReadOnlyList<int> ids;
         try {
             ids = _tokenizer.EncodeToIds(
-                text, 
-                maxTokenCount: _semanticModel.MaxTokens ?? int.MaxValue,
-                addSpecialTokens: true, 
+                text,
+                maxTokenCount: (_semanticModel.MaxTokens ?? int.MaxValue) - 2,
                 normalizedText: out _,
-                charsConsumed: out int charsConsumed
+                charsConsumed: out int charsConsumed,
+                considerPreTokenization: true,
+                considerNormalization: true
             );
             
             if (charsConsumed < text.Length)
@@ -123,7 +149,7 @@ internal sealed class WordPieceTokenizer : ISemanticTokenizer {
 
         return ids;
     }
-    
+
     private (int MaxLen, IReadOnlyList<int>[] Ids) GetIdsAndMaxLen(IReadOnlyList<string> texts, int count) {
         if (count == 0)
             throw new VectanticTokenizationException("At least one text must be provided for batch tokenization.");

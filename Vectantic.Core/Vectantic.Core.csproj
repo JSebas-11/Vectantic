@@ -7,8 +7,9 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
 
     <PackageId>Vectantic.Core</PackageId>
-    <Version>1.0.0</Version>
+    <Version>1.1.0</Version>
     <Authors>Sebastian Delgado (JSebas-11)</Authors>
+    <Company>None</Company>
     <PackageReadmeFile>README.md</PackageReadmeFile>
 
     <Description>Core infrastructure for the Vectantic SDK. Provides model downloading, ONNX session management, dependency injection wiring, and shared abstractions used by Vectantic feature modules.</Description>
@@ -19,6 +20,14 @@
     <RepositoryUrl>https://github.com/JSebas-11/Vectantic</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+
+    <PackageReleaseNotes>
+    v1.1.0
+
+    IMPROVEMENTS
+    - Improved XML documentation for public configuration types.
+    - Updated to remain compatible with Vectantic.Semantic 1.1.0 and Vectantic.Math 1.1.0.
+    </PackageReleaseNotes>
 
   </PropertyGroup>
 

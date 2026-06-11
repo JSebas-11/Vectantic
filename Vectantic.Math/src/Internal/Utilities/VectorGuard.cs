@@ -24,4 +24,9 @@ internal static class VectorGuard {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(k);
         ArgumentOutOfRangeException.ThrowIfGreaterThan(k, candidatesCount);
     }
+    
+    internal static void ValidMinScoreOrException(float minScore) {
+        ArgumentOutOfRangeException.ThrowIfLessThan(minScore, -1f);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(minScore, 1f);
+    }
 }

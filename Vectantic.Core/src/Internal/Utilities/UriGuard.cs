@@ -35,15 +35,51 @@ internal static class UriGuard {
         var urisList = uris?.ToList()
             ?? throw new VectanticInvalidConstructionException($"{name} cannot be null.");
         
-        if (urisList.Count == 0)
+        var listCount = urisList.Count;
+        if (listCount == 0)
             throw new VectanticInvalidConstructionException($"{name} cannot be empty.");
 
-        var parsedList = new List<Uri>(urisList.Count);
+        var parsedList = new List<Uri>(listCount);
         foreach (var uri in urisList) {
             ValidateOrException(uri, name);
             parsedList.Add(new Uri(uri));
         }
 
         return parsedList;
+    }
+
+    // -------------------- URI-DICT --------------------
+    internal static Dictionary<Uri, string> CreateDictOrException(IDictionary<string, string> dict, string name) {
+        var urisDict = dict?.ToDictionary()
+            ?? throw new VectanticInvalidConstructionException($"{name} cannot be null.");
+
+        var dictCount = urisDict.Count;
+        if (dictCount == 0)
+            throw new VectanticInvalidConstructionException($"{name} cannot be empty.");
+
+        var parsedDict = new Dictionary<Uri, string>(dictCount);
+        foreach (var item in urisDict) {
+            ValidateOrException(item.Key, "Dictionary value (Uri)");
+            StringGuard.RequireOrException(item.Value, "Dictionary value (string)");
+
+            parsedDict.Add(new Uri(item.Key), item.Value);
+        }
+
+        return parsedDict;
+    }
+
+    internal static Dictionary<Uri, string> CreateDictOrException(IDictionary<Uri, string> dict, string name) {
+        var urisDict = dict?.ToDictionary()
+            ?? throw new VectanticInvalidConstructionException($"{name} cannot be null.");
+
+        if (urisDict.Count == 0)
+            throw new VectanticInvalidConstructionException($"{name} cannot be empty.");
+
+        foreach (var item in urisDict) {
+            ValidateOrException(item.Key, "Dictionary value (Uri)");
+            StringGuard.RequireOrException(item.Value, "Dictionary value (string)");
+        }
+
+        return urisDict;
     }
 }

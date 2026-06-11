@@ -7,12 +7,12 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
 
     <PackageId>Vectantic.Semantic</PackageId>
-    <Version>1.0.0</Version>
+    <Version>1.1.0</Version>
     <Authors>Sebastian Delgado (JSebas-11)</Authors>
     <Company>None</Company>
     <PackageReadmeFile>README.md</PackageReadmeFile>
 
-    <Description>Semantic embedding and search module for the Vectantic SDK. Provides local text embeddings via ONNX, semantic search, BERT tokenization, mean and CLS pooling strategies, and built-in support for MiniLM-L6-v2 and BGE-Small-EN-v1.5 models.</Description>
+    <Description>Semantic embedding and search module for the Vectantic SDK. Provides local text embeddings via ONNX, semantic search, BERT and BPE tokenization, mean and CLS pooling strategies, and built-in support for MiniLM-L6-v2 and BGE-Small-EN-v1.5 models.</Description>
     <PackageTags>vectantic;semantic-search;embeddings;onnx;bert;tokenizer;pooling;local-ai;nlp;machine-learning;dotnet;minilm;bge;sentence-transformers</PackageTags>
 
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
@@ -20,6 +20,22 @@
     <RepositoryUrl>https://github.com/JSebas-11/Vectantic</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+
+    <PackageReleaseNotes>
+    v1.1.0
+
+    NEW FEATURES
+    - Added support for BPE tokenization through TokenizationType.Bpe.
+    - Added the built-in preset for the sentence-transformers/all-roberta-large-v1 model.
+    - Added new ISemanticSearchService overloads for threshold-based semantic search.
+
+    IMPROVEMENTS
+    - Added SemanticMatch.OriginalIndex to simplify mapping results back to the original collection.
+
+    INTERNAL IMPROVEMENTS
+    - Special tokens are now loaded automatically from special_tokens_map.json.
+    - Special token IDs are now resolved automatically from config.json or vocab.json when required by BPE models.
+    </PackageReleaseNotes>
 
   </PropertyGroup>
 

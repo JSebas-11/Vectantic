@@ -37,13 +37,17 @@ public class VectanticModelInfo {
     public string Checksum { get; }
 
     /// <summary>
-    /// Gets the additional files required by the model runtime.
+    /// Gets the additional files required by the model.
     /// </summary>
     /// <remarks>
-    /// Common examples include tokenizer configuration files, vocabularies,
-    /// and special token mappings required during tokenization.
+    /// These files are downloaded and cached alongside the ONNX model during
+    /// initialization.
+    ///
+    /// Common examples include tokenizer resources, vocabulary files,
+    /// special token mappings, merge rules, configuration files, and
+    /// auxiliary model assets required for inference.
     /// </remarks>
-    public IReadOnlyDictionary<string, Uri> ExtraFiles { get; }
+    public IReadOnlyList<DownloadFileInfo> ExtraFiles { get; }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="VectanticModelInfo"/> class.
@@ -62,11 +66,11 @@ public class VectanticModelInfo {
     /// </param>
     protected VectanticModelInfo(
         string id, Uri modelUrl, string checksum,
-        IReadOnlyDictionary<string, Uri>? extraFiles = null) 
+        IReadOnlyList<DownloadFileInfo>? extraFiles = null) 
     {
         Id = id;
         ModelUrl = modelUrl;
         Checksum = checksum;
-        ExtraFiles = extraFiles ?? new Dictionary<string, Uri>();
+        ExtraFiles = extraFiles ?? [];
     }
 }
